@@ -17,6 +17,10 @@ int Fgo = 8;         // Move F
 int Rgo = 6;         // move to the R
 int Lgo = 4;         // move to the L
 int Bgo = 2;         // move B
+int val;
+
+/*********************************************/
+
 void setup()
 {
   Serial.begin(9600);     // Define motor output pin
@@ -28,6 +32,68 @@ void setup()
   pinMode(outputPin, OUTPUT);  // define output pin for sensor
   myservo.attach(9);    // Define servo motor output pin to D9 (PWM)
 }
+
+/*********************************/
+
+void loop()
+{
+  myservo.write(90);  // home set the servo motor, ready for next measurement
+  detection();        // measure the angle and determine which direction to move
+  if (directionn == 2) // if directionn= 2
+  {
+    back();
+    delay(800);                    //  go backward
+    left() ;
+    delay(200);              // Move slightly to the left (to prevent stuck in dead end)
+    advance();
+  }
+  else if (directionn == 6)          // if directionn = 6
+  {
+    back();
+    delay(100);
+    right();
+    delay(600);                 // turn right
+    advance();
+  }
+  else if (directionn == 4)         // if directionn = 4
+  {
+    back();
+    delay(600);
+    left();
+    delay(600);                  // turn left
+    advance();
+  }
+
+  else if (directionn == 8) {
+    val = Serial.read();
+    if (val == 'U') {
+      advance();
+    }
+    if (val == 'D') {
+      back();
+    }
+    if (val == 'L') {
+      left();
+    }
+    if (val == 'R') {
+      right();
+    }
+    if (val == 'S') {
+      stopp();
+    }
+
+    if (val == "B") {            //for the hand brack
+      while (val == "B") {
+        val = Serial.read();
+      }
+    }
+  }
+
+  Serial.println(directionn);
+}
+
+/*********************************************/
+
 void advance()     // move forward
 {
   digitalWrite(pinLB, LOW);   // right wheel moves forward
@@ -140,35 +206,4 @@ void ask_pin_R()   //  measure distance on the right
   float Rdistance = pulseIn(inputPin, HIGH);  // read the time in between
   Rdistance = Rdistance / 5.8 / 10;  // convert time into distance (unit: cm)
   Rspeedd = Rdistance;              // read the distance into Rspeedd
-}
-void loop()
-{
-  myservo.write(90);  // home set the servo motor, ready for next measurement
-  detection();        // measure the angle and determine which direction to move
-  if (directionn == 2) // if directionn= 2
-  {
-    back();
-    delay(800);                    //  go backward
-    left() ;
-    delay(200);              // Move slightly to the left (to prevent stuck in dead end)
-  }
-  if (directionn == 6)          // if directionn = 6
-  {
-    back();
-    delay(100);
-    right();
-    delay(600);                 // turn right
-  }
-  if (directionn == 4)         // if directionn = 4
-  {
-    back();
-    delay(600);
-    left();
-    delay(600);                  // turn left
-  }
-  if (directionn == 8)         // if directionn = 8
-  {
-    advance();                 // move forward
-    delay(100);
-  }
 }
